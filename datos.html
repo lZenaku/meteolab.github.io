@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Datos — Estación Meteorológica</title>
+  <link rel="stylesheet" href="style.css" />
+  <meta name="color-scheme" content="light dark" />
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <a class="brand" href="index.html">
+        <span class="brand-icon" aria-hidden="true">⛅</span>
+        <span class="brand-text">Meteo Semanal</span>
+      </a>
+      <nav class="top-nav" aria-label="Secciones">
+        <a href="index.html" class="nav-link">Inicio</a>
+        <a href="datos.html" class="nav-link" aria-current="page">Datos</a>
+        <a href="proyectos.html" class="nav-link">Proyectos</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="container">
+      <h1>Datos (ThingSpeak)</h1>
+      <p class="lead">
+        Lecturas en tiempo real desde tu canal ThingSpeak #3123892. Hasta 6 gráficos (fields 1–6). Si un campo no existe, se indica en la tarjeta.
+      </p>
+
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-label">Fuente</div>
+          <div class="stat-value">ThingSpeak API</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Canal</div>
+          <div class="stat-value">3123892</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Última actualización</div>
+          <div class="stat-value" id="last-update">—</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <main class="container" style="margin-top:14px">
+    <!-- Controles -->
+    <section class="toolbar" aria-label="Controles de datos">
+      <div class="filters">
+        <label class="select">
+          <span>Muestras</span>
+          <select id="results-select" aria-label="Cantidad de muestras">
+            <option value="50">50</option>
+            <option value="100" selected>100</option>
+            <option value="200">200</option>
+            <option value="500">500</option>
+          </select>
+        </label>
+
+        <label class="select">
+          <span>Zona horaria</span>
+          <select id="tz-select" aria-label="Zona horaria">
+            <option value="local" selected>Local del navegador</option>
+            <option value="UTC">UTC</option>
+          </select>
+        </label>
+      </div>
+      <button id="reload-btn" class="btn">Recargar</button>
+    </section>
+
+    <!-- 6 gráficos en grilla (3 por fila desktop, 1 móvil) -->
+    <section class="grid three" aria-label="Gráficas">
+      <article class="card">
+        <header class="card-head"><h3 id="title-1">Field 1</h3></header>
+        <div class="chart-wrap">
+          <canvas id="chart-1" height="220" aria-label="Gráfico field 1" role="img"></canvas>
+          <p class="chart-note" id="note-1">Últimas muestras de field 1.</p>
+          <div class="mini-status" id="status-1" hidden></div>
+        </div>
+      </article>
+
+      <article class="card">
+        <header class="card-head"><h3 id="title-2">Field 2</h3></header>
+        <div class="chart-wrap">
+          <canvas id="chart-2" height="220" aria-label="Gráfico field 2" role="img"></canvas>
+          <p class="chart-note" id="note-2">Últimas muestras de field 2.</p>
+          <div class="mini-status" id="status-2" hidden></div>
+        </div>
+      </article>
+
+      <article class="card">
+        <header class="card-head"><h3 id="title-3">Field 3</h3></header>
+        <div class="chart-wrap">
+          <canvas id="chart-3" height="220" aria-label="Gráfico field 3" role="img"></canvas>
+          <p class="chart-note" id="note-3">Últimas muestras de field 3.</p>
+          <div class="mini-status" id="status-3" hidden></div>
+        </div>
+      </article>
+
+      <article class="card">
+        <header class="card-head"><h3 id="title-4">Field 4</h3></header>
+        <div class="chart-wrap">
+          <canvas id="chart-4" height="220" aria-label="Gráfico field 4" role="img"></canvas>
+          <p class="chart-note" id="note-4">Últimas muestras de field 4.</p>
+          <div class="mini-status" id="status-4" hidden></div>
+        </div>
+      </article>
+
+      <article class="card">
+        <header class="card-head"><h3 id="title-5">Field 5</h3></header>
+        <div class="chart-wrap">
+          <canvas id="chart-5" height="220" aria-label="Gráfico field 5" role="img"></canvas>
+          <p class="chart-note" id="note-5">Últimas muestras de field 5.</p>
+          <div class="mini-status" id="status-5" hidden></div>
+        </div>
+      </article>
+
+      <article class="card">
+        <header class="card-head"><h3 id="title-6">Field 6</h3></header>
+        <div class="chart-wrap">
+          <canvas id="chart-6" height="220" aria-label="Gráfico field 6" role="img"></canvas>
+          <p class="chart-note" id="note-6">Últimas muestras de field 6.</p>
+          <div class="mini-status" id="status-6" hidden></div>
+        </div>
+      </article>
+    </section>
+
+    <!-- Estado general -->
+    <section class="about" id="status-box" aria-live="polite" style="display:none;"></section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <p>© <span id="year">2025</span> Meteo Semanal</p>
+      <nav class="footer-links" aria-label="Enlaces de pie de página">
+        <a href="#">Contacto</a>
+        <a href="#">Política de datos</a>
+        <a href="#">Licencia</a>
+      </nav>
+    </div>
+  </footer>
+
+  <script>
+    // ====== Config ======
+    const CHANNEL_ID = 3123892;
+    const READ_API_KEY = 'N6NW577NEBRAZ9A6';
+    const FIELDS = [1,2,3,4,5,6];
+
+    // ====== Estilos desde variables CSS ======
+    function cssVar(name, fallback) {
+      return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || fallback;
+    }
+    const cBrand  = cssVar('--brand', '#0b74ff');
+    const cBrand2 = cssVar('--brand-2', '#2bb8ff');
+    const cText   = cssVar('--text', '#182238');
+    const cGrid   = 'rgba(128, 128, 128, .2)';
+
+    // ====== Estado general UI ======
+    const statusBox = document.getElementById('status-box');
+    function setStatus(html) { statusBox.style.display = 'block'; statusBox.innerHTML = html; }
+    function clearStatus(){ statusBox.style.display = 'none'; statusBox.innerHTML = ''; }
+
+    // ====== Helpers fecha/labels ======
+    function formatLabel(tsISO, mode = 'local') {
+      const d = new Date(tsISO);
+      if (mode === 'UTC') {
+        const mm = String(d.getUTCMonth()+1).padStart(2,'0');
+        const dd = String(d.getUTCDate()).padStart(2,'0');
+        const hh = String(d.getUTCHours()).padStart(2,'0');
+        return `${mm}-${dd} ${hh}:00Z`;
+      } else {
+        const mm = String(d.getMonth()+1).padStart(2,'0');
+        const dd = String(d.getDate()).padStart(2,'0');
+        const hh = String(d.getHours()).padStart(2,'0');
+        return `${mm}-${dd} ${hh}:00`;
+      }
+    }
+
+    // ====== Chart factory ======
+    function mkLineChart(ctx, labels, data, label, yTitle) {
+      return new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [{
+            label,
+            data,
+            borderColor: cBrand,
+            backgroundColor: cBrand2,
+            tension: 0.25,
+            pointRadius: 0,
+            fill: false
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: { mode: 'index', intersect: false },
+          scales: {
+            x: {
+              grid: { color: cGrid },
+              ticks: {
+                autoSkip: true,
+                maxRotation: 0,
+                callback: (v, i) => (i % 6 === 0 ? labels[v] : '')
+              }
+            },
+            y: {
+              grid: { color: cGrid },
+              title: { display: true, text: yTitle, color: cText }
+            }
+          },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                title: (items) => items?.[0]?.label ?? '',
+                label: (item) => `${item.dataset.label}: ${item.formattedValue}`
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // ====== ThingSpeak requests ======
+    async function fetchField(fieldNo, results) {
+      const url = new URL(`https://api.thingspeak.com/channels/${CHANNEL_ID}/fields/${fieldNo}.json`);
+      url.searchParams.set('api_key', READ_API_KEY);
+      url.searchParams.set('results', String(results));
+      const res = await fetch(url.toString());
+      if (!res.ok) throw new Error(`Field ${fieldNo} HTTP ${res.status}`);
+      return res.json();
+    }
+
+    // NUEVO: última actualización con fallback
+    async function updateLastUpdate() {
+      const el = document.getElementById('last-update');
+
+      // 1) Intento directo: último feed del canal
+      try {
+        const urlLast = new URL(`https://api.thingspeak.com/channels/${CHANNEL_ID}/feeds/last.json`);
+        urlLast.searchParams.set('api_key', READ_API_KEY);
+        const res = await fetch(urlLast.toString());
+        if (!res.ok) throw new Error(`last.json HTTP ${res.status}`);
+        const json = await res.json(); // incluye created_at
+        if (json && json.created_at) {
+          el.textContent = new Date(json.created_at).toLocaleString();
+          return;
+        }
+        // si no trae created_at, caemos al fallback
+        throw new Error('last.json sin created_at');
+      } catch (e) {
+        // 2) Fallback: edad del último dato (segundos)
+        try {
+          const urlAge = new URL(`https://api.thingspeak.com/channels/${CHANNEL_ID}/feeds/last_data_age.json`);
+          urlAge.searchParams.set('api_key', READ_API_KEY);
+          const res = await fetch(urlAge.toString());
+          if (!res.ok) throw new Error(`last_data_age.json HTTP ${res.status}`);
+          const age = await res.json(); // { last_data_age: "174", last_data_age_units: "s" }
+          const s = Number(age?.last_data_age || 0);
+          el.textContent = s ? `hace ${s} s` : '—';
+        } catch (e2) {
+          el.textContent = '—';
+          console.error('Error obteniendo última actualización:', e, e2);
+        }
+      }
+    }
+
+    // ====== Render por campo ======
+    let charts = {};
+    async function renderField(fieldNo, results, tzMode) {
+      const titleEl = document.getElementById(`title-${fieldNo}`);
+      const noteEl  = document.getElementById(`note-${fieldNo}`);
+      const statusEl= document.getElementById(`status-${fieldNo}`);
+      const ctx     = document.getElementById(`chart-${fieldNo}`).getContext('2d');
+
+      if (charts[fieldNo]) { charts[fieldNo].destroy(); charts[fieldNo] = null; }
+
+      statusEl.hidden = false;
+      statusEl.textContent = 'Cargando…';
+
+      try {
+        const json = await fetchField(fieldNo, results);
+
+        const ch = json?.channel || {};
+        const fieldName = ch[`field${fieldNo}`] || `Field ${fieldNo}`;
+        titleEl.textContent = fieldName;
+        noteEl.textContent = `Últimas ${results} muestras de ${fieldName}.`;
+
+        const feeds = json?.feeds || [];
+        const points = feeds
+          .map(f => {
+            const val = parseFloat(f[`field${fieldNo}`]);
+            const t   = f.created_at;
+            return (isFinite(val) && t) ? { t, v: val } : null;
+          })
+          .filter(Boolean);
+
+        if (points.length === 0) {
+          statusEl.hidden = false;
+          statusEl.textContent = 'Sin datos para este campo.';
+          return;
+        }
+
+        const labels = points.map(p => formatLabel(p.t, tzMode));
+        const data   = points.map(p => p.v);
+
+        charts[fieldNo] = mkLineChart(ctx, labels, data, fieldName, fieldName);
+        statusEl.hidden = true;
+      } catch (err) {
+        statusEl.hidden = false;
+        statusEl.innerHTML = `Error al cargar: <code>${(err && err.message) || err}</code>`;
+      }
+    }
+
+    async function renderAll() {
+      const results = Number(document.getElementById('results-select').value);
+      const tzMode  = document.getElementById('tz-select').value;
+
+      setStatus(`<strong>Cargando…</strong> Leyendo fields 1–6 de ThingSpeak (results=${results}).`);
+
+      // NUEVO: actualizar "Última actualización"
+      await updateLastUpdate();
+
+      await Promise.all(FIELDS.map(n => renderField(n, results, tzMode)));
+
+      clearStatus();
+    }
+
+    // ====== Eventos ======
+    window.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('reload-btn').addEventListener('click', renderAll);
+      document.getElementById('results-select').addEventListener('change', renderAll);
+      document.getElementById('tz-select').addEventListener('change', renderAll);
+      renderAll();
+    });
+  </script>
+
+  <style>
+    .chart-wrap { position: relative; height: 260px; padding: 8px 12px 26px; }
+    .mini-status { position: absolute; left: 12px; bottom: 6px; font-size: .85rem; color: var(--muted); }
+  </style>
+</body>
+</html>
