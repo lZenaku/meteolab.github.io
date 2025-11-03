@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Semana 3 — MeteoLab</title>
+  <link rel="stylesheet" href="style.css" />
+  <meta name="color-scheme" content="light dark" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <a class="brand" href="index.html">
+        <span class="brand-icon" aria-hidden="true">⛅</span>
+        <span class="brand-text">MeteoLab</span>
+      </a>
+      <nav class="top-nav" aria-label="Secciones">
+        <a href="index.html" class="nav-link">Inicio</a>
+        <a href="datos.html" class="nav-link">Datos</a>
+        <a href="proyectos.html" class="nav-link" aria-current="page">Proyectos</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="container">
+      <h1 id="page-title">Semana 3</h1>
+      <p class="lead" id="page-desc">
+        Definimos la ruta estratégica: priorizamos la idea “Salud &amp; seguridad escolar”
+        y trazamos una hoja de ruta de prototipado v0.1 con hipótesis, criterios y plan de 16 semanas.
+      </p>
+
+      <div style="margin-top:12px;">
+        <a class="btn ghost" href="proyectos.html">← Volver a Proyectos</a>
+      </div>
+    </div>
+  </section>
+
+  <main class="container" style="margin-top:14px">
+    <article class="card">
+      <header class="card-head">
+        <h3>Documentación de la semana</h3>
+      </header>
+
+      <div style="padding:16px;">
+        <h4>1. Objetivos</h4>
+        <ul>
+          <li>Usar la herramienta de <strong>lluvia de ideas</strong> para el proceso creativo.</li>
+          <li>Seleccionar y priorizar una solución mediante votación.</li>
+          <li>Construir una <strong>hoja de ruta</strong> clara para el prototipo v0.1.</li>
+        </ul>
+
+        <h4>2. Lluvia de ideas y priorización</h4>
+        <ul>
+          <li>Se generaron <strong>40 ideas</strong> y se agruparon por afinidad en <strong>10 temas</strong>.</li>
+          <li>Votación del equipo (10 votos por integrante): idea ganadora <strong>#8 — “Salud &amp; seguridad escolar”</strong>.</li>
+          <li>Enfoque: crear <em>alertas sencillas</em> (índice de confort, radiación UV, viento fuerte) para el cuidado diario en la escuela.</li>
+        </ul>
+
+        <h4>3. Hoja de ruta del prototipo (v0.1)</h4>
+        <p><strong>Objetivo de prototipado:</strong> Validar que un sistema ESP32 + sensores de clima capture y envíe datos a la nube en tiempo real para visualización educativa.</p>
+
+        <h5>3.1 Hipótesis clave (RAT)</h5>
+        <ol>
+          <li>ESP32 + sensores capturan datos de forma confiable en entorno escolar.</li>
+          <li>La conexión IoT (Wi-Fi/nube) permite transmisión y almacenamiento en tiempo real.</li>
+          <li>Los datos se traducen en <strong>indicadores simples</strong> útiles (confort, UV, viento).</li>
+        </ol>
+
+        <h5>3.2 Alcances</h5>
+        <ul>
+          <li><strong>Sí:</strong> ESP32; sensores de T°, HR, presión, viento (V/D) y lluvia; IoT básico; energía con panel solar + batería; dashboard inicial en la nube.</li>
+          <li><strong>No (por ahora):</strong> app móvil propia; web personalizada; IA/predicción; integraciones externas avanzadas.</li>
+        </ul>
+
+        <h5>3.3 Criterios de éxito (medibles)</h5>
+        <ul>
+          <li>&gt; 90% de datos transmitidos en 48 h continuas.</li>
+          <li>Retraso &lt; 5 s entre captura y visualización en nube.</li>
+          <li>Error de T°, HR y presión ≤ ±5% vs. estación de referencia.</li>
+          <li>Autonomía ≥ 24 h con energía solar.</li>
+          <li>Al menos un indicador de salud escolar (p. ej., alerta UV alto).</li>
+        </ul>
+
+        <h5>3.4 Backlog (MoSCoW)</h5>
+        <ul>
+          <li><strong>Must:</strong> ESP32 + BME; envío a nube; energía solar + batería; dashboard básico.</li>
+          <li><strong>Should:</strong> Sensores de viento y lluvia.</li>
+          <li><strong>Could:</strong> Reporte semanal; semáforo de índice de confort.</li>
+          <li><strong>Won’t (ahora):</strong> App móvil con notificaciones.</li>
+        </ul>
+
+        <h5>3.5 Cronograma (16 semanas)</h5>
+        <p>De <em>Semana 1</em> (punto de partida) a <em>Semana 16</em> (presentación final), pasando por prototipado, IoT, energía, sensores completos, dashboard y alertas.</p>
+
+        <h5>3.6 RACI (ligero)</h5>
+        <p>Roles: Responsable (R), Aprobador (A), Consultado (C), Informado (I) distribuidos para hardware, firmware, energía, dashboard, validación educativa y coordinación.</p>
+
+        <h5>3.7 Riesgos y mitigaciones</h5>
+        <ul>
+          <li><strong>Intemperie:</strong> gabinete IP67 y sellado de conectores.</li>
+          <li><strong>Energía:</strong> dimensionamiento para ≥ 48 h y protección de batería.</li>
+          <li><strong>Sensores:</strong> calibraciones y contraste con referencias.</li>
+          <li><strong>Conectividad:</strong> buffer local en ESP32 ante cortes de Wi-Fi.</li>
+          <li><strong>Riesgos eléctricos:</strong> fusibles, protección contra sobretensión y puesta a tierra.</li>
+        </ul>
+
+        <h4>4. Mini-setup referencial</h4>
+        <p>
+          ESP32 DevKit v1, BME280 (T°, HR, presión) con abrigo Stevenson, sensor UV GUVA-S12SD,
+          pluviómetro basculante RS485, anemómetro 3 tazas RS485, veleta RS485, módulo RS485-TTL (MAX485),
+          panel solar 20–30 W, batería 12 V, controlador de carga, buck 12→5 V, fusible + TVS, gabinete IP67,
+          mástil/soporte, sílica gel; firmware con envío MQTT/HTTP a ThingSpeak.
+        </p>
+
+        <h4>5. Observaciones</h4>
+        <ul>
+          <li>Falta definir estrategia de testeo en aula para validar indicadores.</li>
+          <li>Validar precisión de sensores RS485 vs. referencias confiables.</li>
+          <li>Detallar integración curricular para uso docente.</li>
+          <li>Riesgo energético y ambiental sigue siendo crítico; se requieren pruebas prolongadas.</li>
+        </ul>
+
+        <h4>6. Conclusiones</h4>
+        <ul>
+          <li>Las 40 ideas se consolidaron en 10 grupos, enfocando el proyecto.</li>
+          <li>Se eligió “Salud &amp; seguridad escolar” por su valor para la comunidad.</li>
+          <li>Se estableció hoja de ruta con hipótesis, criterios, backlog y cronograma.</li>
+          <li>Mini-setup técnico viable y alineado al prototipo v0.1.</li>
+        </ul>
+
+        <!-- Imagen / evidencia (opcional) -->
+        <figure style="margin:18px 0 6px; text-align:center;">
+          <img
+            src="https://meteolab.neocities.org/Imgs/RutaW3.png"
+            alt="Ruta estratégica, hoja de ruta y enfoque Salud & seguridad escolar — Semana 3"
+            style="display:inline-block; width:100%; max-width:860px; height:auto; border-radius:12px; border:var(--border); margin:0 auto;"
+          />
+          <figcaption style="color:var(--muted); margin-top:6px;">
+            Figura: Elección de enfoque, hipótesis, criterios y plan de prototipado (Semana 3).
+          </figcaption>
+        </figure>
+      </div>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <p>© <span id="year">2025</span> MeteoLab</p>
+      <nav class="footer-links" aria-label="Enlaces de pie de página">
+        <!--<a href="#">Contacto</a>-->
+        <!--<a href="#">Política de datos</a>-->
+        <!--<a href="#">Licencia</a>-->
+      </nav>
+    </div>
+  </footer>
+
+  <script>
+    // Título automático según nombre del archivo (semana-3.html → "Semana 3")
+    (function () {
+      const titleEl = document.getElementById('page-title');
+      const yEl     = document.getElementById('year');
+
+      const m = location.pathname.match(/semana-(\d+)\.html$/i);
+      if (m) {
+        const n = Number(m[1]);
+        titleEl.textContent = `Semana ${n}`;
+      }
+      if (yEl) yEl.textContent = String(new Date().getFullYear());
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Semana 10 — MeteoLab</title>
+  <link rel="stylesheet" href="style.css" />
+  <meta name="color-scheme" content="light dark" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <a class="brand" href="index.html">
+        <span class="brand-icon" aria-hidden="true">⛅</span>
+        <span class="brand-text">MeteoLab</span>
+      </a>
+      <nav class="top-nav" aria-label="Secciones">
+        <a href="index.html" class="nav-link">Inicio</a>
+        <a href="datos.html" class="nav-link">Datos</a>
+        <a href="proyectos.html" class="nav-link" aria-current="page">Proyectos</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="container">
+      <h1 id="page-title">Semana 10</h1>
+      <p class="lead" id="page-desc">
+        Redactamos y ensayamos el Elevator Speech: problema, solución, valor, tracción, diferenciador y llamado a la acción.
+      </p>
+      <div style="margin-top:12px;">
+        <a class="btn ghost" href="proyectos.html">← Volver a Proyectos</a>
+      </div>
+    </div>
+  </section>
+
+  <main class="container" style="margin-top:14px">
+    <article class="card">
+      <header class="card-head">
+        <h3>Documentación de la semana</h3>
+      </header>
+      <div style="padding:16px;">
+        <h4>1. Objetivos</h4>
+        <ul>
+          <li>Construir un <strong>pitch</strong> claro y persuasivo en &lt; 60 s.</li>
+          <li>Destacar <strong>valor e impacto</strong> de la estación meteorológica solar.</li>
+          <li>Definir un <strong>llamado a la acción</strong> para aliados/pilotos.</li>
+        </ul>
+
+        <h4>2. Actividades realizadas</h4>
+        <ul>
+          <li>Estructuración del guion: Problema → Solución → Valor/Impacto → Prueba/Tracción → Diferenciador → Solicitud → Cierre.</li>
+          <li>Redacción y ensayo con control de tiempo; ajustes de claridad y métricas.</li>
+        </ul>
+
+        <h4>3. Guion del Elevator Speech</h4>
+        <blockquote style="margin:10px 0; font-size:0.98rem; line-height:1.55;">
+          ¿Sabías que agricultores y escuelas pierden oportunidades por falta de <strong>datos climáticos precisos y en tiempo real</strong>?<br/>
+          Desarrollamos una <strong>estación meteorológica autónoma</strong> (solar) que mide T°, HR, presión, viento y UV, enviando datos a la web.<br/>
+          Con nuestros datos, es posible <strong>anticipar eventos</strong> y tomar mejores decisiones con un costo hasta <strong>60% menor</strong> que equipos comerciales.<br/>
+          Ya tenemos un <strong>prototipo funcional</strong> con precisión cercana al 95% y arquitectura modular.<br/>
+          A diferencia de alternativas, es <strong>económica, autónoma y escalable</strong> para zonas sin red eléctrica.<br/>
+          Buscamos <strong>alianzas</strong> para pilotos en colegios y campos agrícolas.<br/>
+          Con nuestra estación, <em>convertimos el clima en conocimiento</em> y el conocimiento en decisiones inteligentes.
+        </blockquote>
+
+        <figure style="margin:22px 0; text-align:center;">
+          <div style="position:relative; width:100%; max-width:760px; margin:0 auto; aspect-ratio:16/9;">
+            <iframe 
+              src="https://www.youtube.com/embed/S86NSrATzbA?si=G0z-yesBb76RDlt8"
+              title="Elevator Speech — MeteoLab"
+              style="position:absolute; top:0; left:0; width:100%; height:100%; border-radius:12px; border:var(--border);" 
+              frameborder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              referrerpolicy="strict-origin-when-cross-origin"
+              allowfullscreen>
+            </iframe>
+          </div>
+          <figcaption style="color:var(--muted); margin-top:6px;">
+            Video: Elevator Speech — Semana 10.
+          </figcaption>
+        </figure>
+
+        <h4>4. Resultados y observaciones</h4>
+        <ul>
+          <li>Pitch listo para demo con métricas y diferenciadores clave.</li>
+          <li>Tiempo total &lt; 60 s y mensaje comprensible para público no técnico.</li>
+        </ul>
+
+        <h4>5. Próximos pasos</h4>
+        <ul>
+          <li>Grabar versión en video y preparar <strong>diapositiva única</strong> (one-pager) de apoyo.</li>
+          <li>Agendar presentaciones con potenciales aliados y recoger feedback.</li>
+        </ul>
+
+        <!-- Imagen (opcional) -->
+        <figure style="margin:18px 0 6px; text-align:center;">
+          <img src="https://meteolab.neocities.org/Imgs/Elevator.png" alt="Elevator Speech — Semana 10"
+               style="display:inline-block;width:100%;max-width:600px;height:auto;border-radius:12px;border:var(--border);" />
+          <figcaption style="color:var(--muted);margin-top:6px;">Ensayo del Elevator Speech con estructura y métricas clave.</figcaption>
+        </figure>
+      </div>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <p>© <span id="year">2025</span> MeteoLab</p>
+      <nav class="footer-links" aria-label="Enlaces de pie de página">
+        <!--<a href="#">Contacto</a>-->
+      </nav>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      const titleEl = document.getElementById('page-title');
+      const yEl = document.getElementById('year');
+      const m = location.pathname.match(/semana-(\d+)\.html$/i);
+      if (m) titleEl.textContent = `Semana ${Number(m[1])}`;
+      if (yEl) yEl.textContent = String(new Date().getFullYear());
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Semana 8 — MeteoLab</title>
+  <link rel="stylesheet" href="style.css" />
+  <meta name="color-scheme" content="light dark" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <a class="brand" href="index.html">
+        <span class="brand-icon" aria-hidden="true">⛅</span>
+        <span class="brand-text">MeteoLab</span>
+      </a>
+      <nav class="top-nav" aria-label="Secciones">
+        <a href="index.html" class="nav-link">Inicio</a>
+        <a href="datos.html" class="nav-link">Datos</a>
+        <a href="proyectos.html" class="nav-link" aria-current="page">Proyectos</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="container">
+      <h1 id="page-title">Semana 8</h1>
+      <p class="lead" id="page-desc">
+        Prototipo V2: conexionado RS-485 (Modbus) para viento, integración BME280 y GUVA, y lectura estable de todas las variables en el ESP32.
+      </p>
+
+      <div style="margin-top:12px;">
+        <a class="btn ghost" href="proyectos.html">← Volver a Proyectos</a>
+      </div>
+    </div>
+  </section>
+
+  <main class="container" style="margin-top:14px">
+    <article class="card">
+      <header class="card-head">
+        <h3>Documentación de la semana</h3>
+      </header>
+
+      <div style="padding:16px;">
+        <p class="card-desc" style="text-align:justify;">
+          Esta semana llevamos el sistema a <strong>Prototipo V2</strong>, cerrando el lazo de hardware + firmware: pruebas Modbus con sensores de dirección y velocidad de viento (RS-485), integración del BME280 (T°, HR, presión) y del GUVA-S12D (UV), y verificación de lecturas en tiempo real por monitor serial.
+        </p>
+
+        <h4>1. Objetivos</h4>
+        <ul>
+          <li>Completar el <strong>conexionado físico</strong> al ESP32.</li>
+          <li>Configurar comunicación <strong>Modbus RTU</strong> (RS-485) para los sensores de viento.</li>
+          <li>Integrar BME280 (I²C) y GUVA-S12D (ADC) al firmware.</li>
+          <li>Validar <strong>lecturas estables</strong> de todas las variables en el monitor serial.</li>
+        </ul>
+
+        <h4>2. Actividades realizadas</h4>
+        <ul>
+          <li>Montaje RS-485 con MAX485 y parametrización (4800 bps, 8N1).</li>
+          <li>Resolución de conflicto de <em>ID</em> Modbus re-asignando la dirección del anemómetro.</li>
+          <li>Conexión del BME280 (SDA/SCL) y del GUVA-S12D (entrada analógica) al ESP32.</li>
+          <li>Carga del sketch final y verificación de lecturas conjuntas: viento, T°, HR, presión y UV.</li>
+        </ul>
+
+        <!-- Evidencias (actualiza src cuando subas las imágenes) -->
+        <figure style="margin:14px 0; text-align:center;">
+          <img src="https://meteolab.neocities.org/Imgs/RS485.jpg" alt="Verificación Modbus RS-485 — Semana 8"
+               style="display:inline-block;width:100%;max-width:600px;height:auto;border-radius:12px;border:var(--border);" />
+          <figcaption style="color:var(--muted);margin-top:6px;">
+            Pruebas de comunicación Modbus RTU con sensores de viento.
+          </figcaption>
+        </figure>
+
+        <figure style="margin:14px 0; text-align:center;">
+          <img src="https://meteolab.neocities.org/Imgs/SerialMonitor.jpg" alt="Lecturas en monitor serial — Semana 8"
+               style="display:inline-block;width:100%;max-width:600px;height:auto;border-radius:12px;border:var(--border);" />
+          <figcaption style="color:var(--muted);margin-top:6px;">
+            Lecturas simultáneas de viento, T°, HR, presión y UV.
+          </figcaption>
+        </figure>
+
+        <h4>3. Resultados y observaciones</h4>
+        <ul>
+          <li>Lecturas continuas y coherentes en el monitor serial; la comunicación RS-485 quedó estable tras el cambio de dirección Modbus.</li>
+          <li>Clave ajustar parámetros de comunicación (baud, paridad, ID) y considerar calibración de UV y BME.</li>
+        </ul>
+
+        <h4>4. Próximos pasos</h4>
+        <ul>
+          <li>Calibración en campo y contraste con estación de referencia.</li>
+          <li>Optimización energética (panel + batería) para operación continua.</li>
+          <li>Publicación de datos a la nube y visualización en dashboard.</li>
+        </ul>
+      </div>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <p>© <span id="year">2025</span> MeteoLab</p>
+      <nav class="footer-links" aria-label="Enlaces de pie de página">
+        <!--<a href="#">Contacto</a>-->
+        <!--<a href="#">Política de datos</a>-->
+        <!--<a href="#">Licencia</a>-->
+      </nav>
+    </div>
+  </footer>
+
+  <script>
+    // Autocompleta título (si el archivo se llama 'semana-8.html') y el año.
+    (function () {
+      const titleEl = document.getElementById('page-title');
+      const yEl = document.getElementById('year');
+      const m = location.pathname.match(/semana-(\d+)\.html$/i);
+      if (m) titleEl.textContent = `Semana ${Number(m[1])}`;
+      if (yEl) yEl.textContent = String(new Date().getFullYear());
+    })();
+  </script>
+</body>
+</html>
