@@ -199,7 +199,7 @@ select {
   box-shadow: 0 0 0 2px hsl(200 100% 50% / .25);
 }
 .chart-note {
-  position: absolute; bottom: 6px; left: 14px; font-size: .85rem; color: var(--muted);
+  position: absolute; bottom: -5px; left: 14px; font-size: .85rem; color: var(--muted);
 }
 
 /* ====== Tablas ====== */
@@ -279,3 +279,4 @@ select {
   border-bottom: var(--border);
 }
 .card-body { padding: 0 16px 16px; }
+
