@@ -112,10 +112,10 @@
       </article>
 
       <article class="card">
-        <header class="card-head"><h3 id="title-5">Field 5</h3></header>
-        <div class="chart-wrap">
+        <header class="card-head"><h3 id="title-5">Dirección del Viento</h3></header>
+        <div class="chart-wrap" id="compass-wrap-5">
           <canvas id="chart-5" height="220" aria-label="Gráfico field 5" role="img"></canvas>
-          <p class="chart-note" id="note-5">Últimas muestras de field 5.</p>
+          <p class="chart-note" id="note-5">Últimas muestras de dirección del viento.</p>
           <div class="mini-status" id="status-5" hidden></div>
         </div>
       </article>
@@ -181,6 +181,13 @@
       }
     }
 
+    // ====== Helper dirección cardinal ======
+    function degreesToCardinal(deg) {
+      const dirs = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSO', 'SO', 'OSO', 'O', 'ONO', 'NO', 'NNO'];
+      const index = Math.round(deg / 22.5) % 16;
+      return dirs[index];
+    }
+
     // ====== Chart factory ======
     function mkLineChart(ctx, labels, data, label, yTitle) {
       return new Chart(ctx, {
@@ -228,6 +235,121 @@
       });
     }
 
+    // ====== Brújula para dirección del viento ======
+    function drawCompass(ctx, direction) {
+      const canvas = ctx.canvas;
+      const width = canvas.width;
+      const height = canvas.height;
+      const centerX = width / 2;
+      const centerY = height / 2;
+      const radius = Math.min(width, height) * 0.35;
+
+      // Limpiar canvas
+      ctx.clearRect(0, 0, width, height);
+
+      // Fondo del círculo
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+      ctx.fillStyle = cssVar('--panel', '#111a2b');
+      ctx.fill();
+      ctx.strokeStyle = cssVar('--brand', '#4db6ff');
+      ctx.lineWidth = 3;
+      ctx.stroke();
+
+      // Puntos cardinales
+      ctx.font = 'bold 18px sans-serif';
+      ctx.fillStyle = cssVar('--text', '#eaf1ff');
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+
+      const cardinals = [
+        { label: 'N', angle: 0 },
+        { label: 'E', angle: 90 },
+        { label: 'S', angle: 180 },
+        { label: 'O', angle: 270 }
+      ];
+
+      cardinals.forEach(({ label, angle }) => {
+        const rad = (angle - 90) * Math.PI / 180;
+        const x = centerX + Math.cos(rad) * (radius * 0.75);
+        const y = centerY + Math.sin(rad) * (radius * 0.75);
+        ctx.fillText(label, x, y);
+      });
+
+      // Marcas de grados (cada 45°)
+      ctx.strokeStyle = cssVar('--muted', '#9db0d1');
+      ctx.lineWidth = 1;
+      for (let i = 0; i < 8; i++) {
+        const angle = i * 45;
+        const rad = (angle - 90) * Math.PI / 180;
+        const x1 = centerX + Math.cos(rad) * (radius * 0.9);
+        const y1 = centerY + Math.sin(rad) * (radius * 0.9);
+        const x2 = centerX + Math.cos(rad) * (radius * 0.95);
+        const y2 = centerY + Math.sin(rad) * (radius * 0.95);
+        
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+      }
+
+      // Aguja del viento
+      const windRad = (direction - 90) * Math.PI / 180;
+      const needleLength = radius * 0.65;
+      const needleWidth = 8;
+
+      // Punta de la aguja (dirección del viento)
+      const tipX = centerX + Math.cos(windRad) * needleLength;
+      const tipY = centerY + Math.sin(windRad) * needleLength;
+
+      // Base de la aguja
+      const baseX = centerX - Math.cos(windRad) * (needleLength * 0.2);
+      const baseY = centerY - Math.sin(windRad) * (needleLength * 0.2);
+
+      // Perpendiculares para el ancho
+      const perpRad = windRad + Math.PI / 2;
+      const side1X = centerX + Math.cos(perpRad) * needleWidth;
+      const side1Y = centerY + Math.sin(perpRad) * needleWidth;
+      const side2X = centerX - Math.cos(perpRad) * needleWidth;
+      const side2Y = centerY - Math.sin(perpRad) * needleWidth;
+
+      // Dibujar aguja
+      ctx.beginPath();
+      ctx.moveTo(tipX, tipY);
+      ctx.lineTo(side1X, side1Y);
+      ctx.lineTo(baseX, baseY);
+      ctx.lineTo(side2X, side2Y);
+      ctx.closePath();
+
+      const gradient = ctx.createLinearGradient(baseX, baseY, tipX, tipY);
+      gradient.addColorStop(0, cssVar('--brand-2', '#7ce3ff'));
+      gradient.addColorStop(1, cssVar('--brand', '#4db6ff'));
+      ctx.fillStyle = gradient;
+      ctx.fill();
+      ctx.strokeStyle = cssVar('--text', '#eaf1ff');
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Círculo central
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, 10, 0, 2 * Math.PI);
+      ctx.fillStyle = cssVar('--panel-2', '#0e1626');
+      ctx.fill();
+      ctx.strokeStyle = cssVar('--brand', '#4db6ff');
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Valor en grados y dirección cardinal
+      ctx.font = 'bold 24px sans-serif';
+      ctx.fillStyle = cssVar('--text', '#eaf1ff');
+      ctx.textAlign = 'center';
+      ctx.fillText(`${Math.round(direction)}°`, centerX, centerY + radius + 30);
+      
+      ctx.font = 'bold 18px sans-serif';
+      ctx.fillStyle = cssVar('--brand', '#4db6ff');
+      ctx.fillText(degreesToCardinal(direction), centerX, centerY + radius + 55);
+    }
+
     // ====== ThingSpeak requests ======
     async function fetchField(fieldNo, results) {
       const url = new URL(`https://api.thingspeak.com/channels/${CHANNEL_ID}/fields/${fieldNo}.json`);
@@ -238,31 +360,27 @@
       return res.json();
     }
 
-    // NUEVO: última actualización con fallback
     async function updateLastUpdate() {
       const el = document.getElementById('last-update');
 
-      // 1) Intento directo: último feed del canal
       try {
         const urlLast = new URL(`https://api.thingspeak.com/channels/${CHANNEL_ID}/feeds/last.json`);
         urlLast.searchParams.set('api_key', READ_API_KEY);
         const res = await fetch(urlLast.toString());
         if (!res.ok) throw new Error(`last.json HTTP ${res.status}`);
-        const json = await res.json(); // incluye created_at
+        const json = await res.json();
         if (json && json.created_at) {
           el.textContent = new Date(json.created_at).toLocaleString();
           return;
         }
-        // si no trae created_at, caemos al fallback
         throw new Error('last.json sin created_at');
       } catch (e) {
-        // 2) Fallback: edad del último dato (segundos)
         try {
           const urlAge = new URL(`https://api.thingspeak.com/channels/${CHANNEL_ID}/feeds/last_data_age.json`);
           urlAge.searchParams.set('api_key', READ_API_KEY);
           const res = await fetch(urlAge.toString());
           if (!res.ok) throw new Error(`last_data_age.json HTTP ${res.status}`);
-          const age = await res.json(); // { last_data_age: "174", last_data_age_units: "s" }
+          const age = await res.json();
           const s = Number(age?.last_data_age || 0);
           el.textContent = s ? `hace ${s} s` : '—';
         } catch (e2) {
@@ -291,7 +409,6 @@
         const ch = json?.channel || {};
         const fieldName = ch[`field${fieldNo}`] || `Field ${fieldNo}`;
         titleEl.textContent = fieldName;
-        noteEl.textContent = `Últimas ${results} muestras de ${fieldName}.`;
 
         const feeds = json?.feeds || [];
         const points = feeds
@@ -308,11 +425,30 @@
           return;
         }
 
-        const labels = points.map(p => formatLabel(p.t, tzMode));
-        const data   = points.map(p => p.v);
+        // Campo 5: Dirección del viento (brújula)
+        if (fieldNo === 5) {
+          noteEl.textContent = `Dirección actual del viento: ${fieldName}`;
+          
+          // Obtener última dirección
+          const lastDirection = points[points.length - 1].v;
+          
+          // Dibujar brújula
+          drawCompass(ctx, lastDirection);
+          
+          statusEl.hidden = true;
+          
+          // Almacenar referencia para animación (opcional)
+          charts[fieldNo] = { type: 'compass', direction: lastDirection };
+        } else {
+          // Otros campos: gráfico de líneas normal
+          noteEl.textContent = `Últimas ${results} muestras de ${fieldName}.`;
+          
+          const labels = points.map(p => formatLabel(p.t, tzMode));
+          const data   = points.map(p => p.v);
 
-        charts[fieldNo] = mkLineChart(ctx, labels, data, fieldName, fieldName);
-        statusEl.hidden = true;
+          charts[fieldNo] = mkLineChart(ctx, labels, data, fieldName, fieldName);
+          statusEl.hidden = true;
+        }
       } catch (err) {
         statusEl.hidden = false;
         statusEl.innerHTML = `Error al cargar: <code>${(err && err.message) || err}</code>`;
@@ -325,7 +461,6 @@
 
       setStatus(`<strong>Cargando…</strong> Leyendo fields 1–6 de ThingSpeak (results=${results}).`);
 
-      // NUEVO: actualizar "Última actualización"
       await updateLastUpdate();
 
       await Promise.all(FIELDS.map(n => renderField(n, results, tzMode)));
@@ -345,6 +480,19 @@
   <style>
     .chart-wrap { position: relative; height: 260px; padding: 8px 12px 26px; }
     .mini-status { position: absolute; left: 12px; bottom: 6px; font-size: .85rem; color: var(--muted); }
+    
+    /* Estilos específicos para la brújula */
+    #compass-wrap-5 {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    #chart-5 {
+      max-width: 100%;
+      height: auto !important;
+    }
   </style>
 </body>
 </html>
