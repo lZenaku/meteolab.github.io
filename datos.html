@@ -69,8 +69,51 @@
             <option value="UTC">UTC</option>
           </select>
         </label>
+
+        <!-- NUEVO: rango de fechas -->
+        <label class="select">
+          <span>Desde</span>
+          <input type="date" id="start-date">
+        </label>
+
+        <label class="select">
+          <span>Hasta</span>
+          <input type="date" id="end-date">
+        </label>
       </div>
-      <button id="reload-btn" class="btn">Recargar</button>
+
+      <div class="toolbar-actions">
+        <button id="reload-btn" class="btn">Recargar</button>
+        <button id="download-btn" class="btn">Descargar CSV</button>
+      </div>
+    </section>
+
+    <!-- NUEVO: Última lectura en números -->
+    <section class="stats" aria-label="Última lectura" style="padding-bottom: 14px;">
+      <div class="stat">
+        <div class="stat-label">Temperatura</div>
+        <div class="stat-value" id="last-field-1">—</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Humedad</div>
+        <div class="stat-value" id="last-field-2">—</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Presión</div>
+        <div class="stat-value" id="last-field-3">—</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Velocidad Viento</div>
+        <div class="stat-value" id="last-field-4">—</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Dirección Viento</div>
+        <div class="stat-value" id="last-field-5">—</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Radiación</div>
+        <div class="stat-value" id="last-field-6">—</div>
+      </div>
     </section>
 
     <!-- 6 gráficos en grilla (3 por fila desktop, 1 móvil) -->
@@ -150,6 +193,16 @@
     const CHANNEL_ID = 3123892;
     const READ_API_KEY = 'N6NW577NEBRAZ9A6';
     const FIELDS = [1,2,3,4,5,6];
+
+    // 👉 IMPORTANTE: FIELD_META definido AQUÍ, a nivel global, fuera de cualquier función
+    const FIELD_META = {
+      1: { label: 'Temperatura',      unit: '°C',   yTitle: 'Temperatura (°C)' },
+      2: { label: 'Humedad',          unit: '%',    yTitle: 'Humedad relativa (%)' },
+      3: { label: 'Presión',          unit: 'hPa',  yTitle: 'Presión (hPa)' },
+      4: { label: 'Velocidad Viento', unit: 'm/s',  yTitle: 'Velocidad del viento (m/s)' },
+      5: { label: 'Dirección Viento', unit: '°',    yTitle: 'Dirección del viento (°)' },
+      6: { label: 'Radiación',        unit: 'W/m²', yTitle: 'Radiación (W/m²)' }
+    };
 
     // ====== Estilos desde variables CSS ======
     function cssVar(name, fallback) {
@@ -363,18 +416,79 @@
     async function updateLastUpdate() {
       const el = document.getElementById('last-update');
 
+      // elementos de los stats numéricos
+      const lastFieldEls = {};
+      FIELDS.forEach(n => {
+        lastFieldEls[n] = document.getElementById(`last-field-${n}`);
+      });
+
+      function clearLastFields() {
+        FIELDS.forEach(n => {
+          if (lastFieldEls[n]) lastFieldEls[n].textContent = '—';
+        });
+      }
+
       try {
         const urlLast = new URL(`https://api.thingspeak.com/channels/${CHANNEL_ID}/feeds/last.json`);
         urlLast.searchParams.set('api_key', READ_API_KEY);
         const res = await fetch(urlLast.toString());
         if (!res.ok) throw new Error(`last.json HTTP ${res.status}`);
         const json = await res.json();
+
+        // Fecha/hora de la última lectura
         if (json && json.created_at) {
           el.textContent = new Date(json.created_at).toLocaleString();
-          return;
+        } else {
+          el.textContent = '—';
         }
-        throw new Error('last.json sin created_at');
+
+        // Valores de los 6 fields
+        FIELDS.forEach(n => {
+          const target = lastFieldEls[n];
+          if (!target) return;
+
+          const key = `field${n}`;
+          const raw = json[key];
+
+          if (raw === null || raw === undefined) {
+            target.textContent = '—';
+            return;
+          }
+
+          const meta = FIELD_META[n] || {};
+          const unit = meta.unit || '';
+          let valNum = Number(raw);
+          let text = '';
+
+          if (!Number.isFinite(valNum)) {
+            // por si llega algo no numérico
+            text = String(raw);
+          } else {
+            // Formateo sencillo por tipo de campo
+            if (n === 2 || n === 3) {
+              // Humedad y presión, sin decimales
+              text = valNum.toFixed(0);
+            } else if (n === 5) {
+              // Dirección del viento: grados + cardinal
+              const deg = valNum;
+              const cardinal = degreesToCardinal(deg);
+              text = `${deg.toFixed(0)}° ${cardinal}`;
+            } else {
+              // El resto con 1 decimal
+              text = valNum.toFixed(1);
+            }
+
+            if (unit && n !== 5) {
+              text = `${text} ${unit}`;
+            }
+          }
+
+          target.textContent = text;
+        });
+
+        return;
       } catch (e) {
+        // si falla last.json, intentamos solo la "edad" del dato
         try {
           const urlAge = new URL(`https://api.thingspeak.com/channels/${CHANNEL_ID}/feeds/last_data_age.json`);
           urlAge.searchParams.set('api_key', READ_API_KEY);
@@ -387,8 +501,12 @@
           el.textContent = '—';
           console.error('Error obteniendo última actualización:', e, e2);
         }
+
+        // si llegamos aquí, no tenemos valores confiables de last.json
+        clearLastFields();
       }
     }
+
 
     // ====== Render por campo ======
     let charts = {};
@@ -455,6 +573,97 @@
       }
     }
 
+    // ====== Descargar CSV de todos los fields en un rango de fechas ======
+    async function downloadCsvForRange() {
+      const startInput = document.getElementById('start-date').value;
+      const endInput   = document.getElementById('end-date').value;
+
+      if (!startInput || !endInput) {
+        alert('Selecciona fecha de inicio y fecha de fin para descargar el CSV.');
+        return;
+      }
+
+      // Construimos start/end con hora (ThingSpeak espera fecha+hora)
+      const startISO = `${startInput} 00:00:00`;
+      const endISO   = `${endInput} 23:59:59`;
+
+      setStatus(`<strong>Generando CSV…</strong> Rango: ${startInput} a ${endInput}.`);
+
+      try {
+        // Usamos /feeds.json para traer todos los fields juntos
+        const url = new URL(`https://api.thingspeak.com/channels/${CHANNEL_ID}/feeds.json`);
+        url.searchParams.set('api_key', READ_API_KEY);
+        url.searchParams.set('start', startISO);
+        url.searchParams.set('end', endISO);
+        // Si quieres que ThingSpeak convierta las fechas a tu zona: url.searchParams.set('timezone', 'America/Lima');
+
+        const res = await fetch(url.toString());
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+        const json  = await res.json();
+        const feeds = json?.feeds || [];
+
+        if (!feeds.length) {
+          clearStatus();
+          alert('No hay datos en ese rango de fechas.');
+          return;
+        }
+
+        // Cabecera del CSV
+        const header = ['timestamp'];
+        const fieldKeys = FIELDS.map(n => `field${n}`);
+        const fieldLabels = FIELDS.map(n => {
+          const meta = FIELD_META[n] || {};
+          if (meta.label && meta.unit) return `${meta.label} (${meta.unit})`;
+          if (meta.label) return meta.label;
+          return `Field ${n}`;
+        });
+
+        header.push(...fieldLabels);
+
+        const rows = [];
+        rows.push(header.join(','));
+
+        // Filas de datos
+        for (const f of feeds) {
+          const row = [];
+
+          // created_at tal cual (formato ISO de ThingSpeak)
+          row.push(`"${f.created_at}"`);
+
+          for (const key of fieldKeys) {
+            const v = f[key];
+            if (v === null || v === undefined) {
+              row.push('');
+            } else {
+              // Sin comillas para valores numéricos simples
+              row.push(String(v));
+            }
+          }
+
+          rows.push(row.join(','));
+        }
+
+        const csvContent = rows.join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const blobUrl = URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        a.download = `meteo_${startInput}_a_${endInput}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(blobUrl);
+
+        clearStatus();
+      } catch (err) {
+        console.error(err);
+        setStatus(`Error al generar CSV: <code>${(err && err.message) || err}</code>`);
+      }
+    }
+
+
     async function renderAll() {
       const results = Number(document.getElementById('results-select').value);
       const tzMode  = document.getElementById('tz-select').value;
@@ -473,6 +682,9 @@
       document.getElementById('reload-btn').addEventListener('click', renderAll);
       document.getElementById('results-select').addEventListener('change', renderAll);
       document.getElementById('tz-select').addEventListener('change', renderAll);
+
+      // 👉 NUEVO: botón de descarga CSV
+      document.getElementById('download-btn').addEventListener('click', downloadCsvForRange);
       renderAll();
     });
   </script>
@@ -493,6 +705,19 @@
       max-width: 100%;
       height: auto !important;
     }
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .toolbar-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
   </style>
 </body>
 </html>
